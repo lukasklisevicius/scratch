@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smooth Confined Scratch Effect</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f0f0f0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    a {
+      font-size: 24px;
+      text-decoration: none;
+      color: black;
+      position: relative;
+      display: inline-block;
+      padding: 10px;
+    }
+    canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      pointer-events: none;
+      opacity: 0.8;
+    }
+  </style>
+</head>
+<body>
+  <a href="#" id="scratchLink">Hover over me!</a>
+  <canvas id="scratchCanvas"></canvas>
+
+  <script>
+    const link = document.getElementById('scratchLink');
+    const canvas = document.getElementById('scratchCanvas');
+    const ctx = canvas.getContext('2d');
+    let animationFrame;
+    let points = [];
+    let currentLine = 0;
+    let startTime; // To track the start time of the animation
+    const animationDuration = 2000; // 2 seconds
+
+    const canvasPadding = 20; // Increase padding to keep lines away from the borders
+
+    // Set canvas dimensions to match the link
+    function setCanvasSize() {
+      const rect = link.getBoundingClientRect();
+      canvas.width = rect.width;
+      canvas.height = rect.height;
+      canvas.style.top = (rect.top) + 'px';
+      canvas.style.left = (rect.left) + 'px';
+    }
+
+    function clearCanvas() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      currentLine = 0;
+    }
+
+    // Generate scratch points constrained to the inner part of the canvas
+    function generateScratchPoints() {
+      points = [];
+
+      for (let i = 0; i < 15; i++) {  // Generate fewer points for smoother animation
+        const x = Math.random() * (canvas.width - canvasPadding * 2) + canvasPadding;
+        const y = Math.random() * (canvas.height - canvasPadding * 2) + canvasPadding;
+
+        // Stronger spin factor to create more noticeable spins and curves
+        const spinFactor = Math.random() * 60 - 30; // Adjusted spins for a smoother effect
+        points.push({
+          x: Math.max(canvasPadding, Math.min(canvas.width - canvasPadding, x + spinFactor)),  // Keep within bounds
+          y: Math.max(canvasPadding, Math.min(canvas.height - canvasPadding, y + spinFactor))   // Keep within bounds
+        });
+      }
+    }
+
+    // Draw more curves progressively with random spins and control points
+    function animateScratchEffect() {
+      if (currentLine >= points.length - 1) return;
+
+      const point1 = points[currentLine];
+      const point2 = points[currentLine + 1];
+
+      // Create more pronounced spins using control points
+      const controlPoint1 = {
+        x: point1.x + (Math.random() * 60 - 30), // Added randomness for spinning
+        y: point1.y + (Math.random() * 60 - 30)
+      };
+      const controlPoint2 = {
+        x: point2.x + (Math.random() * 60 - 30), // Added randomness for spinning
+        y: point2.y + (Math.random() * 60 - 30)
+      };
+
+      ctx.beginPath();
+      ctx.moveTo(point1.x, point1.y);
+
+      // Use cubic bezier curves for smoother and more dynamic curves
+      ctx.bezierCurveTo(
+        controlPoint1.x, controlPoint1.y,
+        controlPoint2.x, controlPoint2.y,
+        point2.x, point2.y
+      );
+
+      ctx.strokeStyle = '#000'; // Darker for more contrast
+      ctx.lineWidth = 5;        // Thicker lines to resemble pencil/marker strokes
+      ctx.stroke();
+
+      currentLine++;
+
+      // Slow down the animation to create a smoother effect
+      const elapsedTime = Date.now() - startTime; // Calculate elapsed time
+      if (elapsedTime < animationDuration) {
+        setTimeout(() => {
+          animationFrame = requestAnimationFrame(animateScratchEffect);
+        }, 50); // Adjust delay for smoothness (higher value for slower)
+      } else {
+        // Stop the animation after 2 seconds but keep the scratches
+        cancelAnimationFrame(animationFrame);
+      }
+    }
+
+    // Event listeners to trigger the effect on hover
+    link.addEventListener('mouseenter', () => {
+      setCanvasSize();
+      canvas.style.display = 'block';
+      generateScratchPoints();  // Generate new points for each hover
+      startTime = Date.now();    // Record the start time
+      animateScratchEffect();   // Start the animation
+    });
+
+    link.addEventListener('mouseleave', () => {
+      clearCanvas();  // Clear the canvas when the mouse leaves
+      canvas.style.display = 'none';
+    });
+
+    window.addEventListener('resize', setCanvasSize);
+  </script>
+</body>
+</html>

@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Smooth Confined Scratch Effect</title>
   <style>
+    /* *{border: 1px solid;} */
     body {
       font-family: Arial, sans-serif;
       background-color: #f0f0f0;
@@ -50,8 +51,8 @@
     function setCanvasSize() {
       const rect = link.getBoundingClientRect();
       canvas.width = rect.width;
-      canvas.height = rect.height;
-      canvas.style.top = (rect.top) + 'px';
+      canvas.height = rect.height - 10;
+      canvas.style.top = (rect.top + 5) + 'px';
       canvas.style.left = (rect.left) + 'px';
     }
 
@@ -140,3 +141,4 @@
   </script>
 </body>
 </html>
+
